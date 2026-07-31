@@ -1,8 +1,9 @@
 from playwright.sync_api import Page
+from config import Config
 
 
 class LoginPage:
-    URL = "https://www.saucedemo.com"
+    URL = Config.BASE_URL
 
     def __init__(self, page: Page):
         self.page = page
