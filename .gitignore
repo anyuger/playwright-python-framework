@@ -222,3 +222,6 @@ __marimo__/
 
 # Allure results
 allure-results/
+
+# Screenshots
+screenshots/
