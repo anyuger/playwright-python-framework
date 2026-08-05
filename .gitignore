@@ -228,3 +228,6 @@ screenshots/
 
 # Environment variables
 .env
+
+# Logs
+test_run.log
