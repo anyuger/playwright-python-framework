@@ -225,3 +225,6 @@ allure-results/
 
 # Screenshots
 screenshots/
+
+# Environment variables
+.env
