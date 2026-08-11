@@ -1,5 +1,7 @@
 # Playwright Python Automation Framework
 
+![Playwright Tests](https://github.com/anyuger/playwright-python-framework/actions/workflows/tests.yml/badge.svg)
+
 A professional test automation framework built with Playwright and Python, demonstrating Page Object Model architecture, API testing, CI/CD integration, and production-grade engineering practices.
 
 ## Tech Stack
