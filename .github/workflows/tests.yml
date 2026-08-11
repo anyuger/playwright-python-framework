@@ -28,4 +28,4 @@ jobs:
       - name: Run tests
         env:
           REQRES_API_KEY: ${{ secrets.REQRES_API_KEY }}
-        run: pytest --headless
+        run: pytest --override-ini="addopts=--alluredir=allure-results" --browser chromium
