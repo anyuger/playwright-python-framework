@@ -19,8 +19,9 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="session")
 def browser():
     logger.info("Starting browser session")
+    headless = os.getenv("HEADLESS", "false").lower() == "true"
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=headless)
         yield browser
         browser.close()
     logger.info("Browser session closed")
