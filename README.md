@@ -95,6 +95,16 @@ pytest -v
 pytest --headless
 ```
 
+## Running Tests in Docker
+
+```bash
+# Build the image
+docker build -t playwright-framework .
+
+# Run tests
+docker run --rm -e REQRES_API_KEY=your_key_here -e HEADLESS=true playwright-framework
+```
+
 ## Test Coverage
 
 ### UI Tests (saucedemo.com)
