@@ -15,6 +15,7 @@ class AELoginPage:
 
     def navigate(self):
         self.page.goto(self.URL)
+        self.page.wait_for_timeout(1000)
         self.page.locator("[data-qa='login-email']").wait_for()
 
     def login(self, username, password):
