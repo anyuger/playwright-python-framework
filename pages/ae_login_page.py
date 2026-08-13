@@ -14,9 +14,8 @@ class AELoginPage:
         self.error_message = page.locator("p:has-text('Your email or password is incorrect!')")
 
     def navigate(self):
-        self.page.goto(self.URL)
-        self.page.wait_for_timeout(1000)
-        self.page.locator("[data-qa='login-email']").wait_for()
+        self.page.goto(self.URL, wait_until="domcontentloaded")
+        self.page.locator("[data-qa='login-email']").wait_for(timeout=15000)
 
     def login(self, username, password):
         self.username_input.fill(username)

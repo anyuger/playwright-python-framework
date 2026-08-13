@@ -14,8 +14,8 @@ class AEProductsPage:
         self.product_price = page.locator(".productinfo h2")
 
     def navigate(self):
-        self.page.goto(self.URL)
-        self.search_input.wait_for()
+        self.page.goto(self.URL, wait_until="domcontentloaded")
+        self.search_input.wait_for(timeout=15000)
 
     def get_product_count(self) -> int:
         return self.product_name.count()
