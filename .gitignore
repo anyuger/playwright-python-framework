@@ -231,3 +231,7 @@ screenshots/
 
 # Logs
 test_run.log
+
+# Spec-to-test agent run reports and candidate tests
+agent_runs/
+agent_summary.md
