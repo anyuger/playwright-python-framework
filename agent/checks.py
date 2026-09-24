@@ -20,6 +20,8 @@ REVIEW = "review"
 # Without a site: test tools only. A site adds its own config and pages (see Site.allowed_imports).
 ALLOWED_IMPORTS = ("pytest", "re", "playwright.sync_api")
 CRITERION_ID = re.compile(r"\bAC-\d+\b")
+# page.locator(...), overview_page.get_by_role(...), page.locator(...).locator(...) - any receiver
+RAW_LOCATOR_CALL = re.compile(r"(^|\.)(locator|get_by_\w+)$")
 
 
 @dataclass
@@ -87,11 +89,18 @@ def analyze(code: str, criteria: dict, api: dict, allowed_imports: tuple = ALLOW
         info.findings = _check_test(func, raw_lines, info.criteria, criteria, api)
         analysis.tests[func.name] = info
 
-    # Fixtures and helpers can call page objects too
+    # Fixtures and helpers can call page objects too, and can hide raw locators
     test_nodes = set(id(f) for f in find_test_functions(tree))
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and id(node) not in test_nodes:
             analysis.file_findings.extend(_check_page_object_usage(node, api))
+            raw = sorted({f"{_call_name(c)}()" for c in ast.walk(node)
+                          if isinstance(c, ast.Call) and RAW_LOCATOR_CALL.search(_call_name(c))})
+            if raw:
+                # We don't trace which test uses which fixture, so every test is flagged (the safe side)
+                for info in analysis.tests.values():
+                    info.findings.append(Finding(
+                        REVIEW, f"Raw locator {', '.join(raw)} in fixture/helper '{node.name}'", info.name))
 
     if not analysis.tests:
         analysis.file_findings.append(Finding(BLOCKER, "No test functions found"))
@@ -178,7 +187,7 @@ def _check_test(func, raw_source, test_criteria, spec_criteria, api) -> list:
             called = _call_name(node)
             if called in ("time.sleep", "sleep") or called.endswith(".wait_for_timeout"):
                 findings.append(Finding(BLOCKER, f"Hard wait {called}() - use auto-waiting or expect()", name))
-            if called == "page.locator" or re.fullmatch(r"page\.get_by_\w+", called):
+            if RAW_LOCATOR_CALL.search(called):
                 findings.append(Finding(REVIEW, f"Raw locator {called}() outside a page object", name))
         if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value.startswith("http"):
             findings.append(Finding(BLOCKER, f"Hard-coded URL '{node.value}' - use Config", name))

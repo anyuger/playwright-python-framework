@@ -192,6 +192,8 @@ python -m agent --site saucedemo "cart_*" --max-cost 0.50 --max-repairs 1
 
 Spec patterns are expanded by the agent itself, so they work the same in PowerShell and bash.
 
+An example from a real run is in [docs/sample_run/report.md](docs/sample_run/report.md): 3 specs, 9 tests, $0.05, 3 trusted and 6 flagged for review.
+
 Each run writes `agent_runs/<timestamp>_<site>/report.md` (and `report.json`) with every test's verdict, every attempt, and every LLM call's tokens, latency and cost. In CI, the **Spec-to-test agent** workflow (Actions tab, run manually, choose the site) does the same inside Docker, puts the report on the run page, and opens a pull request with the generated tests. It needs an `ANTHROPIC_API_KEY` repository secret, and "Allow GitHub Actions to create pull requests" turned on in the repo settings.
 
 ### Trusted or reviewed?

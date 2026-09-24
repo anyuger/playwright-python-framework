@@ -21,6 +21,10 @@ class CartPage:
     def get_item_names(self) -> list:
         return self.item_names.all_text_contents()
 
+    def remove_item(self, item_name: str):
+        item = self.page.locator(f".cart_item:has-text('{item_name}')")
+        item.locator("button").click()
+
     def proceed_to_checkout(self):
         self.checkout_button.click()
 

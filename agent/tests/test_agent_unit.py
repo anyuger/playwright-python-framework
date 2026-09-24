@@ -246,6 +246,28 @@ class TestStaticChecks:
         assert analysis.blockers == []
         assert [f.severity for f in analysis.tests["test_add_two"].findings] == [checks.REVIEW]
 
+    def test_raw_locator_is_caught_whatever_the_variable_is_called(self):
+        # Found by the first real run: the model wrote overview_page.locator(...) with no
+        # NEW-LOCATOR comment on that line, and the old check only knew "page.locator"
+        code = GOOD_CODE.replace(
+            '        assert inventory_page.get_cart_count() == "1"',
+            '        overview = page\n'
+            '        expect_text = overview.locator("[data-test=\'total-label\']").text_content()\n'
+            '        assert expect_text == "Total: $32.39"')
+        findings = analyze(code).tests["test_add_one"].findings
+        assert [f.severity for f in findings] == [checks.REVIEW]
+        assert "overview.locator()" in findings[0].message
+
+    def test_raw_locator_in_a_fixture_flags_the_tests(self):
+        code = GOOD_CODE.replace(
+            "        login_page.login(Config.STANDARD_USER, Config.PASSWORD)",
+            "        login_page.login(Config.STANDARD_USER, Config.PASSWORD)\n"
+            "        page.get_by_text(\"Open Menu\").click()")
+        analysis = analyze(code)
+        assert analysis.blockers == []
+        for name in ("test_add_one", "test_add_two"):
+            assert any("in fixture/helper 'login'" in f.message for f in analysis.tests[name].findings)
+
     def test_uncovered_criterion_and_missing_assert(self):
         code = GOOD_CODE.replace('        assert inventory_page.get_cart_count() == "2"\n', "")
         analysis = analyze(code, {**CRITERIA, "AC-3": "not tested"})

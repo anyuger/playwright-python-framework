@@ -14,6 +14,10 @@ class CheckoutPage:
         self.finish_button = page.locator("[data-test='finish']")
         self.complete_header = page.locator("[data-test='complete-header']")
         self.error_message = page.locator("[data-test='error']")
+        # Overview step (checkout-step-two.html)
+        self.subtotal_label = page.locator("[data-test='subtotal-label']")
+        self.tax_label = page.locator("[data-test='tax-label']")
+        self.total_label = page.locator("[data-test='total-label']")
 
     def fill_customer_info(self, first_name: str, last_name: str, postal_code: str):
         self.first_name_input.fill(first_name)
