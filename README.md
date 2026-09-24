@@ -190,6 +190,8 @@ python -m agent --site saucedemo checkout_required_fields    # one spec, by name
 python -m agent --site saucedemo "cart_*" --max-cost 0.50 --max-repairs 1
 ```
 
+Generated files may already have been reviewed and edited by a human, so the agent never silently replaces one: if `test_gen_<spec>.py` exists, it is kept and the new version is saved in the run folder for comparison. Pass `--overwrite` (or tick "overwrite" in the workflow) to replace it.
+
 Spec patterns are expanded by the agent itself, so they work the same in PowerShell and bash.
 
 An example from a real run is in [docs/sample_run/report.md](docs/sample_run/report.md): 3 specs, 9 tests, $0.05, 3 trusted and 6 flagged for review.

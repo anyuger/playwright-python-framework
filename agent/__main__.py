@@ -4,6 +4,7 @@ Command line entry point. Run from the repo root.
     python -m agent --site saucedemo                                  every spec in sites/saucedemo/specs/
     python -m agent --site saucedemo checkout_required_fields         one spec, by name
     python -m agent --site saucedemo "cart_*" --max-cost 0.50 --max-repairs 1
+    python -m agent --site saucedemo cart_remove_items --overwrite   replace an existing generated file
 """
 import argparse
 import logging
@@ -23,6 +24,8 @@ def main(argv=None) -> int:
                         help="Spec files, names or patterns (default: every spec in sites/<site>/specs/)")
     parser.add_argument("--max-cost", type=float, help="Budget for this run in USD")
     parser.add_argument("--max-repairs", type=int, help="Self-healing attempts per spec")
+    parser.add_argument("--overwrite", action="store_true",
+                        help="Replace existing generated files (they may contain a human's review)")
     args = parser.parse_args(argv)
 
     # The report has emoji; a Windows console or pipe may not be UTF-8 by default
@@ -45,6 +48,8 @@ def main(argv=None) -> int:
         AgentConfig.MAX_RUN_COST_USD = args.max_cost
     if args.max_repairs is not None:
         AgentConfig.MAX_REPAIR_ATTEMPTS = args.max_repairs
+    if args.overwrite:
+        AgentConfig.OVERWRITE_GENERATED = True
 
     # Imported here so --help works without the SDK installed
     from agent.context import build_context, page_object_api

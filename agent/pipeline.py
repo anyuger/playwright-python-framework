@@ -56,6 +56,7 @@ class SpecResult:
     model_coverage: dict = field(default_factory=dict)
     output_path: str = ""
     error: str = ""
+    note: str = ""                   # e.g. an existing reviewed file was kept
 
 
 class SpecPipeline:
@@ -204,6 +205,17 @@ class SpecPipeline:
         out_dir = Path(self.site.generated_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
         path = out_dir / f"test_gen_{spec.name}.py"
+
+        if path.exists() and not self.config.OVERWRITE_GENERATED:
+            # Don't undo a human's review: keep their file, park the new one for comparison
+            parked = self.run_dir / spec.name / path.name
+            parked.write_text(header + code, encoding="utf-8")
+            result.note = (
+                f"`{path.as_posix()}` already exists (it may have been reviewed and edited) and was kept. "
+                f"The new version is in `{parked.as_posix()}`. Use --overwrite to replace it."
+            )
+            return ""
+
         path.write_text(header + code, encoding="utf-8")
         return path.as_posix()  # same in reports on Windows and Linux
 

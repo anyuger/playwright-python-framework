@@ -18,6 +18,10 @@ on:
       max_repairs:
         description: "Self-healing attempts per spec"
         default: "2"
+      overwrite:
+        description: "Replace existing generated files (they may contain a human's review)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -44,14 +48,15 @@ jobs:
           SPECS: ${{ inputs.specs }}
           MAX_COST: ${{ inputs.max_cost }}
           MAX_REPAIRS: ${{ inputs.max_repairs }}
+          OVERWRITE: ${{ inputs.overwrite }}
         run: |
           docker run --rm \
             -v "${{ github.workspace }}:/app" \
-            -e ANTHROPIC_API_KEY -e SITE -e SPECS -e MAX_COST -e MAX_REPAIRS \
+            -e ANTHROPIC_API_KEY -e SITE -e SPECS -e MAX_COST -e MAX_REPAIRS -e OVERWRITE \
             -e GITHUB_STEP_SUMMARY=/app/agent_summary.md \
             -e HEADLESS=true \
             playwright-framework \
-            sh -c 'python -m agent --site "$SITE" $SPECS --max-cost "$MAX_COST" --max-repairs "$MAX_REPAIRS"'
+            sh -c 'OW=""; [ "$OVERWRITE" = "true" ] && OW="--overwrite"; python -m agent --site "$SITE" $SPECS $OW --max-cost "$MAX_COST" --max-repairs "$MAX_REPAIRS"'
 
       - name: Hand files back to the runner user and show the report
         if: always()

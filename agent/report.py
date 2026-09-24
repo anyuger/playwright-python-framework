@@ -33,6 +33,8 @@ def build_markdown(results: list, llm, run_id: str, site_name: str = "") -> str:
             lines.append(f"\n> {result.error}")
         if result.output_path:
             lines.append(f"\nWritten to `{result.output_path}`")
+        if result.note:
+            lines.append(f"\n> {result.note}")
         repairs = sum(a["kind"] == "repair" for a in result.attempts)
         lines += ["", f"Attempts: {len(result.attempts)} ({repairs} repairs)", ""]
 
@@ -87,6 +89,7 @@ def write_reports(results: list, llm, run_dir: Path, run_id: str, site_name: str
                 "status": r.status,
                 "error": r.error,
                 "output_path": r.output_path,
+                "note": r.note,
                 "uncovered_criteria": r.uncovered_criteria,
                 "model_coverage": r.model_coverage,
                 "assumptions": r.assumptions,

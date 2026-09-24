@@ -197,7 +197,8 @@ class TestSites:
 
     def test_specs_found_without_the_shell_expanding_globs(self):
         site = load_site("saucedemo")
-        assert len(site.find_specs()) == 3
+        on_disk = sorted(p.as_posix() for p in Path("sites/saucedemo/specs").glob("*.md"))
+        assert site.find_specs() == on_disk   # no hard-coded count: specs get added over time
         assert site.find_specs(["checkout_required_fields"]) == [
             "sites/saucedemo/specs/checkout_required_fields.md"]
         assert len(site.find_specs(["sites/saucedemo/specs/checkout_*.md"])) == 2
@@ -324,9 +325,9 @@ class FakeRunner:
         return RunResult(outcomes=outcomes, messages=failed)
 
 
-def make_pipeline(tmp_path, generator, runner):
+def make_pipeline(tmp_path, generator, runner, config=FastConfig):
     site = replace(load_site("saucedemo"), generated_dir=tmp_path / "generated")  # never write into the repo
-    return SpecPipeline(generator, site, page_object_api(site), tmp_path / "run", runner=runner, config=FastConfig)
+    return SpecPipeline(generator, site, page_object_api(site), tmp_path / "run", runner=runner, config=config)
 
 
 def two_ac_spec(tmp_path):
@@ -381,6 +382,30 @@ class TestPipeline:
         bad = GOOD_CODE.replace("get_cart_count()", "get_badge()")
         result = make_pipeline(tmp_path, FakeGenerator([bad] * 3), FakeRunner([])).process(two_ac_spec(tmp_path))
         assert result.status == "rejected" and result.output_path == ""
+
+    def test_existing_reviewed_file_is_not_overwritten(self, tmp_path):
+        reviewed = tmp_path / "generated" / "test_gen_badge.py"
+        reviewed.parent.mkdir(parents=True)
+        reviewed.write_text("# reviewed and edited by a human\n", encoding="utf-8")
+        runner = FakeRunner([{"test_add_one": "passed", "test_add_two": "passed"}] * 2)
+
+        result = make_pipeline(tmp_path, FakeGenerator([GOOD_CODE]), runner).process(two_ac_spec(tmp_path))
+
+        assert reviewed.read_text(encoding="utf-8") == "# reviewed and edited by a human\n"
+        assert result.output_path == "" and "already exists" in result.note
+        assert (tmp_path / "run" / "badge" / "test_gen_badge.py").exists()   # new version parked
+
+    def test_overwrite_replaces_the_existing_file(self, tmp_path):
+        class Overwrite(FastConfig):
+            OVERWRITE_GENERATED = True
+        reviewed = tmp_path / "generated" / "test_gen_badge.py"
+        reviewed.parent.mkdir(parents=True)
+        reviewed.write_text("# old\n", encoding="utf-8")
+        runner = FakeRunner([{"test_add_one": "passed", "test_add_two": "passed"}] * 2)
+
+        result = make_pipeline(tmp_path, FakeGenerator([GOOD_CODE]), runner, Overwrite).process(two_ac_spec(tmp_path))
+
+        assert result.output_path and "class TestSample" in reviewed.read_text(encoding="utf-8")
 
     def test_unreachable_site_stops_without_paying_for_repairs(self, tmp_path):
         generator = FakeGenerator([GOOD_CODE] * 3)

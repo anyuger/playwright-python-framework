@@ -27,6 +27,11 @@ class AgentConfig:
     # Self-healing: how many times the agent may repair its own tests
     MAX_REPAIR_ATTEMPTS = int(os.getenv("AGENT_MAX_REPAIRS", "2"))
 
+    # Generated files may already have been reviewed and edited by a human, so an
+    # existing file is kept and the new version goes to the run folder instead.
+    # --overwrite on the command line turns this on for one run.
+    OVERWRITE_GENERATED = False
+
     # Cost control: the run stops before any call once this is spent
     MAX_RUN_COST_USD = float(os.getenv("AGENT_MAX_COST_USD", "1.00"))
 
