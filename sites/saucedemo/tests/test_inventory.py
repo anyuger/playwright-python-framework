@@ -1,7 +1,7 @@
 import pytest
-from pages.login_page import LoginPage
-from pages.inventory_page import InventoryPage
-from config import Config
+from sites.saucedemo.pages.login_page import LoginPage
+from sites.saucedemo.pages.inventory_page import InventoryPage
+from sites.saucedemo.config import Config
 
 
 class TestInventory:

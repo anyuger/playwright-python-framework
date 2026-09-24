@@ -1,9 +1,9 @@
 import pytest
-from pages.login_page import LoginPage
-from pages.inventory_page import InventoryPage
-from pages.cart_page import CartPage
-from pages.checkout_page import CheckoutPage
-from config import Config
+from sites.saucedemo.pages.login_page import LoginPage
+from sites.saucedemo.pages.inventory_page import InventoryPage
+from sites.saucedemo.pages.cart_page import CartPage
+from sites.saucedemo.pages.checkout_page import CheckoutPage
+from sites.saucedemo.config import Config
 
 
 class TestCheckout:

@@ -1,5 +1,5 @@
 import pytest
-from utils.api_client import APIClient
+from sites.reqres_api.api_client import APIClient
 
 
 class TestAPI:

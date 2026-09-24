@@ -1,10 +1,10 @@
 from playwright.sync_api import Page
 
-from config import Config
+from sites.automationexercise.config import Config
 
 
-class AELoginPage:
-    URL = f'{Config.AE_BASE_URL}/login'
+class LoginPage:
+    URL = f'{Config.BASE_URL}/login'
 
     def __init__(self, page: Page):
         self.page = page

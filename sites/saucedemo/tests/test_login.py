@@ -1,6 +1,6 @@
 import pytest
-from pages.login_page import LoginPage
-from config import Config
+from sites.saucedemo.pages.login_page import LoginPage
+from sites.saucedemo.config import Config
 
 
 class TestLogin:

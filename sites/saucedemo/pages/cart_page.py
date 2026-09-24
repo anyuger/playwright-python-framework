@@ -1,5 +1,5 @@
 from playwright.sync_api import Page
-from config import Config
+from sites.saucedemo.config import Config
 
 
 class CartPage:
