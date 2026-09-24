@@ -13,6 +13,9 @@ class CartPage:
         self.item_names = page.locator(".inventory_item_name")
 
     def get_cart_item_count(self) -> int:
+        # count() does not wait; the checkout button renders with the cart,
+        # even when the cart is empty, so it is a safe signal the page is ready
+        self.checkout_button.wait_for()
         return self.cart_items.count()
 
     def get_item_names(self) -> list:

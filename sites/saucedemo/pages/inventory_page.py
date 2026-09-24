@@ -12,6 +12,8 @@ class InventoryPage:
         self.cart_badge = page.locator(".shopping_cart_badge")
 
     def get_item_count(self) -> int:
+        # count() does not wait, so wait for the product list to render first
+        self.inventory_items.first.wait_for()
         return self.inventory_items.count()
 
     def add_item_to_cart(self, item_name: str):
