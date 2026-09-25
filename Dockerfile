@@ -9,4 +9,5 @@ RUN playwright install --with-deps chromium
 
 COPY . .
 
-CMD ["pytest", "--override-ini=addopts=--alluredir=allure-results"]
+# Same options as pytest.ini minus --headed (no screen in a container)
+CMD ["pytest", "--override-ini=addopts=--alluredir=allure-results --strict-markers"]
