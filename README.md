@@ -114,6 +114,10 @@ pytest sites/reqres_api
 # Run specific test file
 pytest sites/saucedemo/tests/test_login.py
 
+# Run by tag (saucedemo): smoke is the critical path, regression is everything
+pytest -m smoke
+pytest -m regression
+
 # Run with verbose output
 pytest -v
 

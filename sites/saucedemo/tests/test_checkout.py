@@ -14,6 +14,7 @@ class TestCheckout:
         login_page.navigate()
         login_page.login(Config.STANDARD_USER, Config.PASSWORD)
 
+    @pytest.mark.smoke
     def test_complete_checkout_flow(self, page):
         # Add item to cart
         inventory_page = InventoryPage(page)

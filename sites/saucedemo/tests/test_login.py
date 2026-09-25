@@ -5,6 +5,7 @@ from sites.saucedemo.config import Config
 
 class TestLogin:
 
+    @pytest.mark.smoke
     def test_valid_login(self, page):
         login_page = LoginPage(page)
         login_page.navigate()
