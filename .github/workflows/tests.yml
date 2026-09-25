@@ -19,4 +19,17 @@ jobs:
         run: docker build -t playwright-framework .
 
       - name: Run tests in Docker
-        run: docker run --rm -e REQRES_API_KEY=${{ secrets.REQRES_API_KEY }} -e AE_EMAIL=${{ secrets.AE_EMAIL }} -e AE_PASSWORD=${{ secrets.AE_PASSWORD }} -e HEADLESS=true playwright-framework
+        # The workspace is mounted so screenshots, the log and Allure results come back out
+        run: docker run --rm -v "${{ github.workspace }}:/app" -e REQRES_API_KEY=${{ secrets.REQRES_API_KEY }} -e AE_EMAIL=${{ secrets.AE_EMAIL }} -e AE_PASSWORD=${{ secrets.AE_PASSWORD }} -e HEADLESS=true playwright-framework
+
+      - name: Upload screenshots, log and Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: |
+            screenshots/
+            test_run.log
+            allure-results/
+          if-no-files-found: ignore
+          retention-days: 14

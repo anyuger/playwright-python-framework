@@ -47,6 +47,12 @@ def pytest_runtest_makereport(item, call):
             logger.error(f"TEST FAILED: {item.name}")
             page = item.funcargs.get("page")
             if page:
+                # Title and URL tell "our bug" from "the site showed something else"
+                # (e.g. a Cloudflare "Just a moment..." check) without opening the screenshot
+                try:
+                    logger.error(f"Page at failure: {page.url} - title '{page.title()}'")
+                except Exception as error:
+                    logger.error(f"Page at failure: could not read page ({error})")
                 screenshots_dir = "screenshots"
                 os.makedirs(screenshots_dir, exist_ok=True)
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
