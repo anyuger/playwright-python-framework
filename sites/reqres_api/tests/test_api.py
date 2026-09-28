@@ -1,4 +1,5 @@
 import pytest
+import requests
 from sites.reqres_api.api_client import APIClient
 
 
@@ -10,6 +11,7 @@ class TestAPI:
 
     def test_get_users_returns_200(self):
         response = self.client.get_users(page=1)
+        assert self.client.last_response.status_code == 200
         assert response["page"] == 1
         assert len(response["data"]) > 0
 
@@ -42,6 +44,8 @@ class TestAPI:
         status_code = self.client.delete_user(user_id=2)
         assert status_code == 204
 
-    def test_get_nonexistent_user(self):
-        with pytest.raises(Exception):
+    def test_get_nonexistent_user_returns_404(self):
+        # HTTPError only, so a network failure (ConnectionError) fails the test instead of passing it
+        with pytest.raises(requests.HTTPError) as error:
             self.client.get_user(user_id=9999)
+        assert error.value.response.status_code == 404

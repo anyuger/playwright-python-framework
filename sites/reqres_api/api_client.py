@@ -10,6 +10,8 @@ class APIClient:
 
     def __init__(self):
         api_key = os.getenv("REQRES_API_KEY", "")
+        # The last HTTP response, so tests can check status codes as well as the body
+        self.last_response = None
         self.session = requests.Session()
         self.session.headers.update({
             "Content-Type": "application/json",
@@ -18,26 +20,31 @@ class APIClient:
 
     def get_users(self, page: int = 1) -> dict:
         response = self.session.get(f"{self.BASE_URL}/users", params={"page": page})
+        self.last_response = response
         response.raise_for_status()
         return response.json()
 
     def get_user(self, user_id: int) -> dict:
         response = self.session.get(f"{self.BASE_URL}/users/{user_id}")
+        self.last_response = response
         response.raise_for_status()
         return response.json()
 
     def create_user(self, name: str, job: str) -> dict:
         payload = {"name": name, "job": job}
         response = self.session.post(f"{self.BASE_URL}/users", json=payload)
+        self.last_response = response
         response.raise_for_status()
         return response.json()
 
     def update_user(self, user_id: int, name: str, job: str) -> dict:
         payload = {"name": name, "job": job}
         response = self.session.put(f"{self.BASE_URL}/users/{user_id}", json=payload)
+        self.last_response = response
         response.raise_for_status()
         return response.json()
 
     def delete_user(self, user_id: int) -> int:
         response = self.session.delete(f"{self.BASE_URL}/users/{user_id}")
+        self.last_response = response
         return response.status_code

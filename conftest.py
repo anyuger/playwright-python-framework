@@ -28,9 +28,12 @@ def browser():
 
 
 @pytest.fixture(scope="function")
-def page(browser):
+def page(browser, request):
     context = browser.new_context()
     page = context.new_page()
+    # Kept on the test item so the screenshot hook can find the page even when a
+    # fixture that runs before `page` reaches item.funcargs (e.g. an autouse login) fails
+    request.node._page = page
     logger.info(f"Starting test - new page created")
     yield page
     context.close()
@@ -42,24 +45,30 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
 
-    if report.when == "call":
-        if report.failed:
-            logger.error(f"TEST FAILED: {item.name}")
-            page = item.funcargs.get("page")
-            if page:
-                # Title and URL tell "our bug" from "the site showed something else"
-                # (e.g. a Cloudflare "Just a moment..." check) without opening the screenshot
-                try:
-                    logger.error(f"Page at failure: {page.url} - title '{page.title()}'")
-                except Exception as error:
-                    logger.error(f"Page at failure: could not read page ({error})")
-                screenshots_dir = "screenshots"
-                os.makedirs(screenshots_dir, exist_ok=True)
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                screenshot_path = os.path.join(
-                    screenshots_dir, f"{item.name}_{timestamp}.png"
-                )
+    # "setup" covers fixtures (a broken login), "call" covers the test body
+    if report.when not in ("setup", "call"):
+        return
+
+    if report.failed:
+        logger.error(f"TEST FAILED ({report.when}): {item.name}")
+        page = getattr(item, "_page", None)
+        if page:
+            # Title and URL tell "our bug" from "the site showed something else"
+            # (e.g. a Cloudflare "Just a moment..." check) without opening the screenshot
+            try:
+                logger.error(f"Page at failure: {page.url} - title '{page.title()}'")
+            except Exception as error:
+                logger.error(f"Page at failure: could not read page ({error})")
+            screenshots_dir = "screenshots"
+            os.makedirs(screenshots_dir, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            screenshot_path = os.path.join(
+                screenshots_dir, f"{item.name}_{report.when}_{timestamp}.png"
+            )
+            try:
                 page.screenshot(path=screenshot_path)
                 logger.info(f"Screenshot saved: {screenshot_path}")
-        else:
-            logger.info(f"TEST PASSED: {item.name}")
+            except Exception as error:
+                logger.error(f"Screenshot failed ({error})")
+    elif report.when == "call" and report.passed:
+        logger.info(f"TEST PASSED: {item.name}")

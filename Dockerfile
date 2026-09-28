@@ -9,5 +9,7 @@ RUN playwright install --with-deps chromium
 
 COPY . .
 
-# Same options as pytest.ini minus --headed (no screen in a container)
-CMD ["pytest", "--override-ini=addopts=--alluredir=allure-results --strict-markers"]
+# No screen in a container. The browser fixture in conftest.py reads HEADLESS.
+ENV HEADLESS=true
+
+CMD ["pytest"]

@@ -37,7 +37,7 @@ def run_tests(test_file: str, timeout_seconds: int = 600) -> RunResult:
     report_path = test_path.with_suffix(".junit.xml")
     command = [
         sys.executable, "-m", "pytest", str(test_path),
-        "--override-ini=addopts=",   # no --headed / allure from pytest.ini
+        "--override-ini=addopts=",   # no allure output from pytest.ini
         "-p", "no:cacheprovider",
         f"--junitxml={report_path}",
         "-q", "--tb=short",
