@@ -9,7 +9,5 @@ RUN playwright install --with-deps chromium
 
 COPY . .
 
-# No screen in a container. The browser fixture in conftest.py reads HEADLESS.
-ENV HEADLESS=true
-
+# pytest-playwright runs headless by default, so no extra options are needed here
 CMD ["pytest"]

@@ -43,7 +43,8 @@ def run_tests(test_file: str, timeout_seconds: int = 600) -> RunResult:
         "-q", "--tb=short",
     ]
     # UTF-8 both ways, so a non-ASCII character in pytest output can't crash the agent on Windows
-    env = {**os.environ, "HEADLESS": "true", "PYTHONIOENCODING": "utf-8"}
+    # pytest-playwright is headless by default, and addopts is cleared above, so no --headed
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
 
     try:
         completed = subprocess.run(

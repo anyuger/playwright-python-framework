@@ -2,7 +2,6 @@ import pytest
 import os
 import logging
 from datetime import datetime
-from playwright.sync_api import sync_playwright
 
 # Configure logging
 logging.basicConfig(
@@ -15,29 +14,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
-@pytest.fixture(scope="session")
-def browser():
-    logger.info("Starting browser session")
-    headless = os.getenv("HEADLESS", "false").lower() == "true"
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
-        yield browser
-        browser.close()
-    logger.info("Browser session closed")
+# The browser, context and page fixtures come from pytest-playwright, so its options work:
+#   pytest --headed                     show the browser window (headless by default)
+#   pytest --browser firefox            run in another browser; repeat --browser for several
+#   pytest --tracing retain-on-failure  keep a Playwright trace of each failed test (set in pytest.ini)
 
 
-@pytest.fixture(scope="function")
-def page(browser, request):
-    context = browser.new_context()
-    page = context.new_page()
-    # Kept on the test item so the screenshot hook can find the page even when a
-    # fixture that runs before `page` reaches item.funcargs (e.g. an autouse login) fails
-    request.node._page = page
-    logger.info(f"Starting test - new page created")
-    yield page
-    context.close()
-    logger.info("Test complete - context closed")
+@pytest.fixture(autouse=True)
+def _keep_page_for_screenshots(request):
+    # Only for tests that use a browser, so API and agent unit tests never start one.
+    # Autouse fixtures from this file run before a test class's autouse login, so the page
+    # is stored on the test item even when the login fails, and the screenshot hook finds it.
+    if "page" in request.fixturenames:
+        request.node._page = request.getfixturevalue("page")
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)

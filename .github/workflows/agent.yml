@@ -54,7 +54,6 @@ jobs:
             -v "${{ github.workspace }}:/app" \
             -e ANTHROPIC_API_KEY -e SITE -e SPECS -e MAX_COST -e MAX_REPAIRS -e OVERWRITE \
             -e GITHUB_STEP_SUMMARY=/app/agent_summary.md \
-            -e HEADLESS=true \
             playwright-framework \
             sh -c 'OW=""; [ "$OVERWRITE" = "true" ] && OW="--overwrite"; python -m agent --site "$SITE" $SPECS $OW --max-cost "$MAX_COST" --max-repairs "$MAX_REPAIRS"'
 

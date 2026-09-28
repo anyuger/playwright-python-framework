@@ -226,6 +226,9 @@ allure-results/
 # Screenshots
 screenshots/
 
+# Playwright traces of failed tests (pytest-playwright --tracing)
+test-results/
+
 # Environment variables
 .env
 

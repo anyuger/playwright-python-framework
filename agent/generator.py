@@ -48,7 +48,7 @@ tests for an existing Page Object Model framework.
 
 Rules:
 1. Follow the style of the reference test file: a Test* class, an autouse login
-   fixture when the flow needs a logged-in user, the `page` fixture from conftest.py.
+   fixture when the flow needs a logged-in user, the `page` fixture from pytest-playwright.
 2. Use existing page object methods and locator attributes. Never invent a method
    or attribute that is not in the page object source you were given.
 3. If the spec needs an element no page object exposes, you may use

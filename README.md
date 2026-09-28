@@ -40,7 +40,7 @@ playwright-python-framework/
 │       └── tests/                  # CRUD and error handling tests
 ├── agent/                          # Spec-to-test agent (see below)
 │   └── tests/                      # Agent unit tests (mocked, no API calls)
-├── conftest.py                     # Shared fixtures, logging, screenshot on failure
+├── conftest.py                     # Logging, screenshot on failure (fixtures come from pytest-playwright)
 ├── pytest.ini                      # pytest configuration
 ├── Dockerfile                      # Container for CI runs
 └── requirements.txt                # Pinned dependencies
@@ -57,8 +57,8 @@ playwright-python-framework/
 - **Page Object Model** - each page is a class with locators as attributes and user actions as methods. Tests call `login_page.login()`, not raw Playwright selectors, so locator changes require a single fix in one place.
 - **Config layer** - each site keeps its URLs, credentials, and timeouts in its own `config.py`. No hardcoded values in test files.
 - **One folder per site** - pages, tests and settings for a site live together under `sites/`, so sites never share or overwrite each other's page objects.
-- **Session-scoped browser, function-scoped page** - one browser instance per test run, fresh context per test. Ensures test isolation without the overhead of launching a new browser for every test.
-- **Screenshot on failure** - `conftest.py` hooks into pytest's reporting lifecycle and automatically captures a timestamped screenshot when any test fails.
+- **pytest-playwright fixtures** - the plugin provides one browser per test run and a fresh context and page per test, so tests are isolated without launching a new browser each time. The framework does not redefine these fixtures, so the plugin's options work: `--headed`, `--browser`, `--tracing`, `--video`.
+- **Screenshot and trace on failure** - `conftest.py` hooks into pytest's reporting lifecycle and captures a timestamped screenshot when a test fails, including failures in fixtures such as the login step. A Playwright trace of each failed test (every action, DOM snapshots, network and console) is kept in `test-results/`.
 - **Logging** - every test run produces a `test_run.log` with timestamps and pass/fail status for each test, making failures traceable without re-running.
 - **API key in .env** - credentials are never committed to source control.
 
@@ -121,9 +121,15 @@ pytest -m regression
 # Run with verbose output
 pytest -v
 
-# Run headless (no browser window)
-$env:HEADLESS="true"; pytest   # Windows PowerShell
-HEADLESS=true pytest             # Mac/Linux
+# Tests run headless by default. Show the browser window:
+pytest --headed
+
+# Run in another browser, or in several (install them first: playwright install firefox webkit)
+pytest --browser firefox
+pytest --browser chromium --browser webkit
+
+# Open the trace of a failed test
+playwright show-trace test-results/<test-folder>/trace.zip
 ```
 
 ## Running Tests in Docker
@@ -133,7 +139,7 @@ HEADLESS=true pytest             # Mac/Linux
 docker build -t playwright-framework .
 
 # Run tests
-docker run --rm -e REQRES_API_KEY=your_key_here -e AE_EMAIL=your_email -e AE_PASSWORD=your_password -e HEADLESS=true playwright-framework
+docker run --rm -e REQRES_API_KEY=your_key_here -e AE_EMAIL=your_email -e AE_PASSWORD=your_password playwright-framework
 ```
 
 ## Test Coverage
